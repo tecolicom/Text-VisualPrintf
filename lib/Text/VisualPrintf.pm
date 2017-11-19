@@ -47,7 +47,7 @@ sub _sub_uniqstr {
 	my $len = Text::VisualWidth::PP::width(shift)
 	    or croak "Unexpected input.";
 	$len == 1 and return "\006";
-	$n > 25 and $n = 25;
+	$n > 24 and $n = 24;
 	my $s = pack("CC", $n / 5 + 1, $n % 5 + 1) . ("_" x ($len - 2));
 	$n++;
 	$s;
