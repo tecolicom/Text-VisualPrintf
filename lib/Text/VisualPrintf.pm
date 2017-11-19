@@ -1,77 +1,52 @@
-package Text::MBPrintf;
+package Text::VisualPrintf;
 
+use v5.10;
 use strict;
 use warnings;
 
+our $VERSION = "2.01";
+
+use strict;
+use warnings;
 use Carp;
 
-BEGIN {
-    use Exporter   ();
-    our ($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
+use Exporter 'import';
+our @EXPORT_OK = qw(&vprintf &vsprintf);
 
-    $VERSION = sprintf "%d.%03d", q$Revision: 1.7 $ =~ /(\d+)/g;
+sub vprintf  { &printf (@_) }
+sub vsprintf { &sprintf(@_) }
 
-    @ISA         = qw(Exporter);
-    @EXPORT      = qw(&mbprintf &mbsprintf);
-    %EXPORT_TAGS = ( );
-    @EXPORT_OK   = qw(&mbwidth $wchar_re $Ambiguous);
-}
-our @EXPORT_OK;
-
-our $Ambiguous;
-our $wchar_re;
-
-END { }
-
-BEGIN {
-    my $wide = "\\p{East_Asian_Width=Wide}";
-    my $fullwidth = "\\p{East_Asian_Width=FullWidth}";
-    my $ambiguous = "\\p{East_Asian_Width=Ambiguous}";
-
-    if ($Ambiguous) {
-	$wchar_re = qr/[${wide}${fullwidth}${ambiguous}]/;
-    } else {
-	$wchar_re = qr/[${wide}${fullwidth}]/;
-    }
-}
-
-sub mbsprintf {
+sub sprintf {
     my($format, @args) = @_;
     my @list;
 
     my $uniqstr = _sub_uniqstr();
     for my $arg (@args) {
 	next if not defined $arg;
-	next if $arg !~ /$wchar_re/;
+	next if $arg !~ /\P{ASCII}/;
 	push(@list, $arg);
-	push(@list, $arg = $uniqstr->(mbwidth($arg)));
+	push(@list, $arg = $uniqstr->($arg));
     }
-    my $result = sprintf($format, @args);
+    my $result = CORE::sprintf($format, @args);
     while (my($orig, $tmp) = splice(@list, 0, 2)) {
 	$result =~ s/$tmp/$orig/;
     }
     $result;
 }
 
-sub mbprintf {
-    print mbsprintf(@_);
+sub printf ($$@) {
+    my $fh = ref $_[0] eq 'GLOB' ? shift : select;
+    $fh->printf(&sprintf(@_));
 }
 
-sub mbwidth {
-    my $arg = shift;
-    my $len = length($arg);
-    while ($arg =~ m/($wchar_re+)/g) {
-	$len += length($1);
-    }
-    $len;
-}
+use Text::VisualWidth::PP;
 
 sub _sub_uniqstr {
     my $n = 0;
     sub {
-	my $len = shift;
-	croak "Illegal length" if $len < 2;
-	croak "Too many arguments" if $n >= 25;
+	my $len = Text::VisualWidth::PP::width(shift);
+	$len < 2 and croak "String too short";
+	$n >= 25 and croak "Too many arguments";
 	my $s = pack("CC", $n / 5 + 1, $n % 5 + 1) . ("_" x ($len - 2));
 	$n++;
 	$s;
@@ -82,34 +57,39 @@ sub _sub_uniqstr {
 
 __END__
 
-=pod
-
-=encoding utf8
+=encoding utf-8
 
 =head1 NAME
 
-MBPrintf - printf family functions to handle multi-byte characters
+Text::VisualPrintf - printf family functions to handle Non-ASCII characters
 
 =head1 SYNOPSIS
 
-use MBPrintf;
+    use Text::VisualPrintf;
+    Text::VisualPrintf::printf(FORMAT, LIST)
+    Text::VisualPrintf::sprintf(FORMAT, LIST)
 
-mbprintf(FORMAT, LIST)
+    use Text::VisualPrintf qw(vprintf vsprintf);
+    vprintf(FORMAT, LIST)
+    vsprintf(FORMAT, LIST)
 
-mbsprintf(FORMAT, LIST)
 
 =head1 DESCRIPTION
 
-C<MBPrintf> is a almost-printf-compatible library with a capability of
-handling multi-byte wide characters properly.
+Text::VisualPrintf is a almost-printf-compatible library with a
+capability of handling multi-byte wide characters properly.
 
 =head1 FUNCTIONS
 
 =over 4
 
-=item mbprintf(FORMAT, LIST)
+=item printf(FORMAT, LIST)
 
-=item mbsprintf(FORMAT, LIST)
+=item sprintf(FORMAT, LIST)
+
+=item vprintf(FORMAT, LIST)
+
+=item vsprintf(FORMAT, LIST)
 
 Use just like perl's I<printf> and I<sprintf> functions
 except that I<printf> does not take FILEHANDLE as a first argument.
@@ -120,29 +100,25 @@ except that I<printf> does not take FILEHANDLE as a first argument.
 
 Strings in the LIST which contains wide-width character are replaced
 before formatting, and recovered after the process.  Number of
-replaced arguments are limited by 25.
+replaced arguments are limited to 25.
 
 Unique replacement string contains a combination of control characters
 (Control-A to Control-E).  So, if the FORMAT contains a string in this
 range, it has a chance to be a subject of replacement.
 
-Wide-character judgement is done based on Unicode property
-B<East_Asian_Width> is B<Wide> or B<FullWidth>.  There is another
-value B<Ambiguous> and treatment of this type characters are literaly
-B<ambiguous>.  Set module variable C<$Text::MBPrintf::Ambiguous> in
-advance to use these characters as wide.
+=head1 SEE ALSO
 
-    BEGIN {
-        $Text::MBPrintf::Ambiguous = 1;
-    }
-    use Text::MBPrintf qw($wchar_re);
+L<Text::VisualWidth::PP>
 
 =head1 AUTHOR
 
-Copyright (c) 2011-2014 Kazumasa Utashiro.  All rights reserved.
+Kaz Utashiro
 
 =head1 LICENSE
 
-See L<http://www.perl.com/perl/misc/Artistic.html>
+Copyright (C) 2011-2017 Kaz Utashiro.
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
 
 =cut
