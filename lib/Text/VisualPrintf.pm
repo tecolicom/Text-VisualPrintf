@@ -24,8 +24,8 @@ sub sprintf {
     for my $arg (@args) {
 	next if not defined $arg;
 	next if $arg !~ /\P{ASCII}/;
-	push(@list, $arg);
-	push(@list, $arg = $uniqstr->($arg));
+	push @list, $arg;
+	push @list, $arg = $uniqstr->($arg);
     }
     my $result = CORE::sprintf($format, @args);
     while (my($orig, $tmp) = splice(@list, 0, 2)) {
@@ -44,9 +44,10 @@ use Text::VisualWidth::PP;
 sub _sub_uniqstr {
     my $n = 0;
     sub {
-	my $len = Text::VisualWidth::PP::width(shift);
-	$len < 2 and croak "String too short";
-	$n >= 25 and croak "Too many arguments";
+	my $len = Text::VisualWidth::PP::width(shift)
+	    or croak "Unexpected input.";
+	$len == 1 and return "\006";
+	$n > 25 and $n = 25;
 	my $s = pack("CC", $n / 5 + 1, $n % 5 + 1) . ("_" x ($len - 2));
 	$n++;
 	$s;
@@ -99,12 +100,17 @@ except that I<printf> does not take FILEHANDLE as a first argument.
 =head1 IMPLEMENTATION NOTES
 
 Strings in the LIST which contains wide-width character are replaced
-before formatting, and recovered after the process.  Number of
-replaced arguments are limited to 25.
+before formatting, and recovered after the process.
 
 Unique replacement string contains a combination of control characters
 (Control-A to Control-E).  So, if the FORMAT contains a string in this
 range, it has a chance to be a subject of replacement.
+
+Single half-width multi-byte character is exception, and all
+represented by single octal 006 (Control-F) character.  It may sounds
+odd, but they are converted to proper string because the order is
+preserved.  Same thing can be done for longer arguments, and when the
+number or arguments exceeds 25, they are encoded by same code.
 
 =head1 SEE ALSO
 
