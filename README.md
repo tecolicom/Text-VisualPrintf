@@ -46,6 +46,8 @@ number or arguments exceeds 25, they are encoded by same code.
 
 [Text::VisualWidth::PP](https://metacpan.org/pod/Text::VisualWidth::PP)
 
+[https://github.com/kaz-utashiro/Text-VisualPrintf](https://github.com/kaz-utashiro/Text-VisualPrintf)
+
 # AUTHOR
 
 Kaz Utashiro

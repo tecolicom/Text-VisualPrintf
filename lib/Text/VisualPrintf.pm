@@ -34,7 +34,7 @@ sub sprintf {
     $result;
 }
 
-sub printf ($$@) {
+sub printf {
     my $fh = ref $_[0] eq 'GLOB' ? shift : select;
     $fh->printf(&sprintf(@_));
 }
@@ -115,6 +115,8 @@ number or arguments exceeds 25, they are encoded by same code.
 =head1 SEE ALSO
 
 L<Text::VisualWidth::PP>
+
+L<https://github.com/kaz-utashiro/Text-VisualPrintf>
 
 =head1 AUTHOR
 
