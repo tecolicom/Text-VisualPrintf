@@ -1,10 +1,10 @@
 use strict;
 use warnings;
 use utf8;
+use open ':std', ':encoding(utf8)';
+use Text::VisualPrintf;
 
 use Test::More tests => 4;
-
-use Text::VisualPrintf;
 
 # single half-width kana is special
 is( Text::VisualPrintf::sprintf( "%s-%2s-%3s", qw"ｱ ｲ ｳ"),  "ｱ- ｲ-  ｳ", 'multiple half' );
