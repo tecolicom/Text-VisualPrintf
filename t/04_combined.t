@@ -49,9 +49,9 @@ use Test::More tests => 3;
  TODO:
 {
     local $TODO = "Stand-alone non-spacing character.";
-    # Causes run-time error, because the width is zero.
+    # Zero-width argument is ignored.
     is( vsprintf( "は%-5s", "$m{CM}" ),
-	"は$m{CM}     ",
+	"は$m{CM}     ", # this is what we theoretically want.
 	'は + ゜' );
 }
 
