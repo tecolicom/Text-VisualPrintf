@@ -4,7 +4,7 @@ use v5.10;
 use strict;
 use warnings;
 
-our $VERSION = "2.02";
+our $VERSION = "2.03";
 
 use strict;
 use warnings;
