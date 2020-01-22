@@ -2,6 +2,7 @@ use strict;
 use warnings;
 use utf8;
 use open ':std', ':encoding(utf8)';
+use charnames ':full';
 use Text::VisualPrintf 'vsprintf';
 
 sub kana {
