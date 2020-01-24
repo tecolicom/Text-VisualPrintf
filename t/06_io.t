@@ -2,7 +2,7 @@ use strict;
 use warnings;
 use utf8;
 use Encode;
-use open ':std', ':encoding(utf8)';
+use open IO => ':utf8', ':std';
 
 use Test::More;
 
