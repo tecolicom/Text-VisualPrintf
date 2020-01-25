@@ -8,7 +8,7 @@ use Test::More;
 
 use Text::VisualPrintf::IO;
 
-if (1) {
+{
     my $out;
 
     open OUT, ">", \$out or die;
@@ -18,7 +18,7 @@ if (1) {
     is( decode('utf8', $out),  "あいうえお\n", 'FH->printf' );
 }
 
-if (1) {
+{
     my $out;
 
     open OUT, ">", \$out or die;
@@ -40,14 +40,16 @@ sub subprocess (&) {
     $out;
 }
 
-if (1) {
+SKIP: {
+    skip "skip windows", 1 if $^O eq 'MSWin32';
     my $out = subprocess {
 	STDOUT->printf("%10s\n", "あいうえお");
     };
     is( $out,  "あいうえお\n", 'STDOUT' );
 }
 
-if (1) {
+SKIP: {
+    skip "skip windows", 1 if $^O eq 'MSWin32';
     my $out = subprocess {
 	use IO::Handle;
 	my $io = IO::Handle->new();
@@ -59,7 +61,8 @@ if (1) {
     is( $out,  "あいうえお\n", 'IO::Handle' );
 }
 
-if (1) {
+SKIP: {
+    skip "skip windows", 1 if $^O eq 'MSWin32';
     my $out = subprocess {
 	use IO::File;
 	my $io = IO::File->new(">/dev/stdout") or die;
