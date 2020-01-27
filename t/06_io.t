@@ -41,7 +41,7 @@ sub subprocess (&) {
 }
 
 SKIP: {
-    skip "skip windows", 1 if $^O eq 'MSWin32';
+    skip "windows", 1 if $^O eq 'MSWin32';
     my $out = subprocess {
 	STDOUT->printf("%10s\n", "あいうえお");
     };
@@ -49,7 +49,7 @@ SKIP: {
 }
 
 SKIP: {
-    skip "skip windows", 1 if $^O eq 'MSWin32';
+    skip "windows", 1 if $^O eq 'MSWin32';
     my $out = subprocess {
 	use IO::Handle;
 	my $io = IO::Handle->new();
@@ -62,7 +62,7 @@ SKIP: {
 }
 
 SKIP: {
-    skip "skip windows", 1 if $^O eq 'MSWin32';
+    skip "windows", 1 if $^O eq 'MSWin32';
     my $out = subprocess {
 	use IO::File;
 	my $io = IO::File->new(">/dev/stdout") or die;
