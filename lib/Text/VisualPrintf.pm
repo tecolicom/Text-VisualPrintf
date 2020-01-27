@@ -14,7 +14,7 @@ sub vprintf  { &printf (@_) }
 sub vsprintf { &sprintf(@_) }
 
 sub sprintf {
-    my $uniqstr = _sub_uniqstr(@_) or goto &CORE::sprintf;
+    my $uniqstr = _sub_uniqstr(@_) or return CORE::sprintf(@_);
     my($format, @args) = @_;
     my @replace;
     for (@args) {
@@ -23,7 +23,6 @@ sub sprintf {
 	push @replace, $replace => $_;
 	$_ = $replace;
     }
-    @replace or goto &CORE::sprintf;
     my $result = CORE::sprintf($format, @args);
     while (my($tmp, $orig) = splice(@replace, 0, 2)) {
 	$result =~ s/$tmp/$orig/;
