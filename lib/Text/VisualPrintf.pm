@@ -14,20 +14,18 @@ sub vprintf  { &printf (@_) }
 sub vsprintf { &sprintf(@_) }
 
 sub sprintf {
+    my $uniqstr = _sub_uniqstr(@_) or goto &CORE::sprintf;
     my($format, @args) = @_;
-
-    my $uniqstr = _sub_uniqstr($format, @args)
-	or return CORE::sprintf($format, @args);
-
-    my @list;
+    my @replace;
     for (@args) {
 	defined and /\P{ASCII}/ or next;
-	my $replacement = $uniqstr->($_) // next;
-	push @list, $replacement => $_;
-	$_ = $replacement;
+	my $replace = $uniqstr->($_) // next;
+	push @replace, $replace => $_;
+	$_ = $replace;
     }
+    @replace or goto &CORE::sprintf;
     my $result = CORE::sprintf($format, @args);
-    while (my($tmp, $orig) = splice(@list, 0, 2)) {
+    while (my($tmp, $orig) = splice(@replace, 0, 2)) {
 	$result =~ s/$tmp/$orig/;
     }
     $result;
@@ -58,7 +56,7 @@ sub _sub_uniqstr {
     sub {
 	my $len = Text::VisualWidth::PP::width(shift);
 	return undef if $len < 2;
-	CORE::sprintf("%s%s", $seq[$n++ % @seq], "_" x ($len - 2));
+	$seq[$n++ % @seq] . ("_" x ($len - 2));
     }
 }
 
