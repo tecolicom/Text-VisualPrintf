@@ -9,9 +9,7 @@ use Text::VisualPrintf qw(vprintf vsprintf);
 use Test::More;
 
 {
-    my $out;
-
-    open OUT, ">", \$out or die;
+    open OUT, ">", \(my $out) or die;
     Text::VisualPrintf::printf OUT "%12s\n", "あいうえお";
     close OUT;
 
@@ -24,9 +22,7 @@ use Test::More;
 }
 
 {
-    my $out;
-
-    open OUT, ">", \$out or die;
+    open OUT, ">", \(my $out) or die;
     vprintf OUT "%13s\n", "あいうえお";
     close OUT;
 
@@ -34,9 +30,7 @@ use Test::More;
 }
 
 {
-    my $out;
-
-    open OUT, ">", \$out or die;
+    open OUT, ">", \(my $out) or die;
     OUT->vprintf("%14s\n", "あいうえお");
     close OUT;
 
