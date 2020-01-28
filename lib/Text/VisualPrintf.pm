@@ -103,6 +103,12 @@ except that I<printf> does not take FILEHANDLE as a first argument.
 
 =back
 
+=head1 BUGS
+
+Text truncation is not supported.  Next program does not work.
+
+    vsprintf("%.4s", "一二三");
+
 =head1 IMPLEMENTATION NOTES
 
 Strings in the LIST which contains wide-width character are replaced
@@ -111,6 +117,10 @@ before formatting, and recovered after the process.
 Unique replacement string contains a combination of control characters
 (Control-A to Control-E).  If the FORMAT contains all of these two
 bytes combinations, the function behaves just like a standard one.
+
+Because this mechanism expects entire replacement string can be found
+in formatted text, it does not work when the string is truncated by
+maximum precision.
 
 =head1 SEE ALSO
 
