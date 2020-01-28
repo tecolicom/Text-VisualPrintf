@@ -14,8 +14,9 @@ sub vprintf  { &printf (@_) }
 sub vsprintf { &sprintf(@_) }
 
 sub sprintf {
-    my $uniqstr = _sub_uniqstr(@_) or return CORE::sprintf(@_);
     my($format, @args) = @_;
+    my $uniqstr = _sub_uniqstr($format, @args)
+	or return CORE::sprintf($format, @args);
     my @replace;
     for (@args) {
 	defined and /\P{ASCII}/ or next;
