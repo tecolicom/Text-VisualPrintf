@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Carp;
 
-our $VERSION = "2.04";
+our $VERSION = "2.05";
 
 use Exporter 'import';
 our @EXPORT_OK = qw(&vprintf &vsprintf);
