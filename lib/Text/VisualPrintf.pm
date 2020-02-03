@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Carp;
 
-our $VERSION = "2.05";
+our $VERSION = "2.06";
 
 use Exporter 'import';
 our @EXPORT_OK = qw(&vprintf &vsprintf);
@@ -123,6 +123,8 @@ in formatted text, it does not work when the string is truncated by
 maximum precision.
 
 =head1 SEE ALSO
+
+L<Text::VisualPrintf::IO>
 
 L<Text::VisualWidth::PP>
 

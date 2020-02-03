@@ -49,6 +49,8 @@ maximum precision.
 
 # SEE ALSO
 
+[Text::VisualPrintf::IO](https://metacpan.org/pod/Text::VisualPrintf::IO)
+
 [Text::VisualWidth::PP](https://metacpan.org/pod/Text::VisualWidth::PP)
 
 [https://github.com/kaz-utashiro/Text-VisualPrintf](https://github.com/kaz-utashiro/Text-VisualPrintf)
