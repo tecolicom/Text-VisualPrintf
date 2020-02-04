@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Carp;
 
-our $VERSION = "2.06";
+our $VERSION = "3.01";
 
 use Exporter 'import';
 our @EXPORT_OK = qw(&vprintf &vsprintf);
@@ -100,7 +100,7 @@ Text::VisualPrintf - printf family functions to handle Non-ASCII characters
 
 =head1 VERSION
 
-Version 2.06
+Version 3.01
 
 =head1 DESCRIPTION
 
