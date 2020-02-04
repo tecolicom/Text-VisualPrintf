@@ -37,12 +37,12 @@ Text::VisualPrintf::IO - IO::Handle interface using Text::VisualPrintf
     use IO::Handle;
     use Text::VisualPrintf::IO qw(printf vprintf);
 
-    FILEHANDLE->printf(FORMAR, LIST);
+    FILEHANDLE->printf(FORMAT, LIST);
 
 =head1 DESCRIPTION
 
 This module (re)define C<printf> and/or C<vprintf> method in
-C<IO::Handle> class as C<Text::VisualPrintf::printf> funciton.  So you
+C<IO::Handle> class as C<Text::VisualPrintf::printf> function.  So you
 can use these methods from C<IO::File> class or such.
 
 =head1 SEE ALSO

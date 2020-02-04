@@ -42,8 +42,9 @@
       },
       "runtime" : {
          "requires" : {
+            "Text::ANSI::Fold" : "1.02",
             "Text::VisualWidth::PP" : "0.05",
-            "perl" : "v5.10.0"
+            "perl" : "5.014"
          }
       },
       "test" : {
