@@ -54,9 +54,7 @@ truncated to one.
 
 # SEE ALSO
 
-[Text::VisualPrintf::IO](https://metacpan.org/pod/Text::VisualPrintf::IO)
-
-[Text::VisualWidth::PP](https://metacpan.org/pod/Text::VisualWidth::PP)
+[Text::VisualPrintf](https://metacpan.org/pod/Text::VisualPrintf), [Text::VisualPrintf::IO](https://metacpan.org/pod/Text::VisualPrintf::IO)
 
 [https://github.com/kaz-utashiro/Text-VisualPrintf](https://github.com/kaz-utashiro/Text-VisualPrintf)
 

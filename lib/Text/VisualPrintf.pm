@@ -16,7 +16,7 @@ sub vsprintf { &sprintf(@_) }
 sub sprintf {
     my($format, @args) = @_;
     my $uniqstr = _sub_uniqstr($format, @args)
-	or return CORE::sprintf($format, @args);
+	or return CORE::sprintf $format, @args;
     my @replace;
     for (@args) {
 	defined and /\P{ASCII}/ or next;
@@ -24,7 +24,7 @@ sub sprintf {
 	push @replace, [ $regex, $_, $len ];
 	$_ = $replace;
     }
-    local $_ = CORE::sprintf($format, @args);
+    local $_ = CORE::sprintf $format, @args;
     while (@replace) {
 	my($regex, $orig, $len) = @{shift @replace};
 	s/($regex)/_replace($1, $orig, $len)/e;
@@ -36,8 +36,6 @@ sub printf {
     my $fh = ref($_[0]) =~ /^(?:GLOB|IO::)/ ? shift : select;
     $fh->print(&sprintf(@_));
 }
-
-use Text::VisualWidth::PP;
 
 sub _replace {
     my($matched, $orig, $len) = @_;
@@ -51,17 +49,19 @@ sub _replace {
     }
 }
 
+use Text::VisualWidth::PP;
+
 sub _sub_uniqstr {
     my $format = shift;
     my @seq;
 
   LOOP:
-    for my $i (1 .. 5) {
-	for my $j (1 .. 5) {
+    for my $j (1 .. 5) {
+	for my $i (1 .. 5) {
 	    next if $i == $j;
-	    my($c1, $c2) = map pack("C", $_), $i, $j;
-	    next if @seq and $seq[-1][1] eq $c1;
-	    push @seq, [$c1, $c2] if index($format, $c1.$c2) < 0;
+	    my($a, $b) = map pack("C", $_), $i, $j;
+	    next if @seq and $seq[-1][1] eq $a;
+	    push @seq, [$a, $b] if index($format, $a.$b) < 0;
 	    last LOOP if @seq >= @_;
 	}
     }
@@ -71,10 +71,8 @@ sub _sub_uniqstr {
     sub {
 	my $len = Text::VisualWidth::PP::width +shift;
 	return undef if $len-- < 2;
-	my($c1, $c2) = @{$seq[$n++ % @seq]};
-	my $replace = $c1 . ($c2 x $len);
-	my $regex = qr/${c1}${c2}{1,$len}/;
-	[ $replace, $regex, ++$len ];
+	my($a, $b) = @{$seq[$n++ % @seq]};
+	[ $a . ($b x $len), qr/${a}${b}{1,$len}/, ++$len ];
     }
 }
 
@@ -146,9 +144,7 @@ truncated to one.
 
 =head1 SEE ALSO
 
-L<Text::VisualPrintf::IO>
-
-L<Text::VisualWidth::PP>
+L<Text::VisualPrintf>, L<Text::VisualPrintf::IO>
 
 L<https://github.com/kaz-utashiro/Text-VisualPrintf>
 
