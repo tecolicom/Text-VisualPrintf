@@ -30,7 +30,8 @@ sub ctrls {
 	    push @seq, pack "CC", $i, $j;
 	}
     }
-    join '', @seq;
+    local $" = '';
+    wantarray ? @seq : "@seq";
 };
 
 my $longseq = ctrls(5, 3);
@@ -45,6 +46,17 @@ is( Text::VisualPrintf::sprintf("$longseq(%5s)", "壱"),
     is( Text::VisualPrintf::sprintf("$allseq(%5s)", "壱"),
 	"$allseq(   壱)",
 	'All binary pattern format.');
+}
+
+ TODO:
+{
+    local $TODO = "Outlimit param";
+    my @allseq = ctrls(5, 5);
+    my $format = "%s" x @allseq . "(%5s)";
+    my $expect = join '', @allseq, "(   壱)";
+    is( Text::VisualPrintf::sprintf($format, @allseq, "壱"),
+	$expect,
+	'All binary pattern paramater.');
 }
 
 {

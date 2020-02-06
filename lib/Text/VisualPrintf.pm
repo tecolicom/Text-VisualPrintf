@@ -52,28 +52,20 @@ sub _replace {
 use Text::VisualWidth::PP;
 
 sub _sub_uniqstr {
-    my $format = shift;
-    my @seq;
-
-  LOOP:
+    local $_ = join '', @_;
     for my $j (1 .. 5) {
 	for my $i (1 .. 5) {
 	    next if $i == $j;
 	    my($a, $b) = map pack("C", $_), $i, $j;
-	    next if @seq and $seq[-1][1] eq $a;
-	    push @seq, [$a, $b] if index($format, $a.$b) < 0;
-	    last LOOP if @seq >= @_;
+	    next if /${a}${b}/;
+	    return sub {
+		my $len = Text::VisualWidth::PP::width +shift;
+		return undef if $len-- < 2;
+		[ $a . ($b x $len), qr/${a}${b}{1,$len}/, ++$len ];
+	    };
 	}
     }
-    return undef if @seq == 0;
-
-    my $n = 0;
-    sub {
-	my $len = Text::VisualWidth::PP::width +shift;
-	return undef if $len-- < 2;
-	my($a, $b) = @{$seq[$n++ % @seq]};
-	[ $a . ($b x $len), qr/${a}${b}{1,$len}/, ++$len ];
-    }
+    return undef;
 }
 
 1;
