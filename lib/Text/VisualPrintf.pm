@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Carp;
 
-our $VERSION = "3.01";
+our $VERSION = "3.02";
 
 use Exporter 'import';
 our @EXPORT_OK = qw(&vprintf &vsprintf);
@@ -53,15 +53,17 @@ use Text::VisualWidth::PP;
 
 sub _sub_uniqstr {
     local $_ = join '', @_;
-    for my $j (1 .. 5) {
-	for my $i (1 .. 5) {
-	    next if $i == $j;
-	    my($a, $b) = map pack("C", $_), $i, $j;
-	    next if /${a}${b}/;
+    my @pair;
+    for my $i (1 .. 255) {
+	my $c = pack "C", $i;
+	next if $c =~ /\s/ || /\Q$c/;
+	push @pair, $c;
+	if (@pair >= 2) {
+	    my($a, $b) = @pair;
 	    return sub {
 		my $len = Text::VisualWidth::PP::width +shift;
 		return undef if $len-- < 2;
-		[ $a . ($b x $len), qr/${a}${b}{1,$len}/, ++$len ];
+		[ $a . ($b x $len), qr/\Q${a}${b}\E*/, ++$len ];
 	    };
 	}
     }
@@ -90,7 +92,7 @@ Text::VisualPrintf - printf family functions to handle Non-ASCII characters
 
 =head1 VERSION
 
-Version 3.01
+Version 3.02
 
 =head1 DESCRIPTION
 
@@ -99,7 +101,7 @@ capability of handling multi-byte wide characters properly.
 
 When the given string is truncated by the maximum precision, space
 character is padded if the wide character does not fit to the remained
-space.  It fails with the target width less than two.
+space.
 
 =head1 FUNCTIONS
 
@@ -126,13 +128,10 @@ to work with FILEHANDLE and printf.
 Strings in the LIST which contains wide-width character are replaced
 before formatting, and recovered after the process.
 
-Unique replacement string contains combinations of control characters
-(Control-A to Control-E).  If the FORMAT contains all of these two
-bytes combinations, the function behaves just like a standard one.
-
-Because this mechanism expects at least two bytes of string can be
-found in the formatted text, it does not work when the string is
-truncated to one.
+Unique replacement string contains combinations of two ASCII
+characters not found in the format string and all parameters.  If two
+characters are not available, function behaves just like a standard
+one.
 
 =head1 SEE ALSO
 
