@@ -20,7 +20,7 @@ sub sprintf {
     my @replace;
     for (@args) {
 	defined and /\P{ASCII}/ or next;
-	my($replace, $regex, $len) = @{$uniqstr->($_) // next};
+	my($replace, $regex, $len) = $uniqstr->($_) or next;
 	push @replace, [ $regex, $_, $len ];
 	$_ = $replace;
     }
@@ -62,12 +62,12 @@ sub _sub_uniqstr {
 	    my($a, $b) = @pair;
 	    return sub {
 		my $len = Text::VisualWidth::PP::width +shift;
-		return undef if $len-- < 2;
-		[ $a . ($b x $len), qr/\Q${a}${b}\E*/, ++$len ];
+		return if $len < 2;
+		( $a . ($b x ($len - 1)), qr/\Q${a}${b}\E*/, $len );
 	    };
 	}
     }
-    return undef;
+    return;
 }
 
 1;
