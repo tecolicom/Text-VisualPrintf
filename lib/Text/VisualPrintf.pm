@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Carp;
 
-our $VERSION = "3.02";
+our $VERSION = "3.03";
 
 use Exporter 'import';
 our @EXPORT_OK = qw(&vprintf &vsprintf);
@@ -19,7 +19,7 @@ sub sprintf {
 	or return CORE::sprintf $format, @args;
     my @replace;
     for (@args) {
-	defined and /\P{ASCII}/ or next;
+	defined and /[\e\P{ASCII}]/ or next;
 	my($replace, $regex, $len) = $uniqstr->($_) or next;
 	push @replace, [ $regex, $_, $len ];
 	$_ = $replace;
@@ -50,6 +50,7 @@ sub _replace {
 }
 
 use Text::VisualWidth::PP;
+our $VISUAL_WIDTH = \&Text::VisualWidth::PP::width;
 
 sub _sub_uniqstr {
     local $_ = join '', @_;
@@ -61,7 +62,7 @@ sub _sub_uniqstr {
 	if (@pair >= 2) {
 	    my($a, $b) = @pair;
 	    return sub {
-		my $len = Text::VisualWidth::PP::width +shift;
+		my $len = $VISUAL_WIDTH->(+shift);
 		return if $len < 2;
 		( $a . ($b x ($len - 1)), qr/\Q${a}${b}\E*/, $len );
 	    };
@@ -92,7 +93,7 @@ Text::VisualPrintf - printf family functions to handle Non-ASCII characters
 
 =head1 VERSION
 
-Version 3.02
+Version 3.03
 
 =head1 DESCRIPTION
 
@@ -123,6 +124,17 @@ to work with FILEHANDLE and printf.
 
 =back
 
+=head1 VARIABLES
+
+=over 4
+
+=item $VISUAL_WIDTH
+
+Hold a function pointer to calculate visual width of given string.
+Default function is C<Text::VisualWidth::PP::width>.
+
+=back
+
 =head1 IMPLEMENTATION NOTES
 
 Strings in the LIST which contains wide-width character are replaced
@@ -138,6 +150,8 @@ one.
 L<Text::VisualPrintf>, L<Text::VisualPrintf::IO>
 
 L<https://github.com/kaz-utashiro/Text-VisualPrintf>
+
+L<Text::ANSI::Printf>
 
 =head1 AUTHOR
 

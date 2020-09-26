@@ -2,6 +2,10 @@ Revision history for Perl extension Text-VisualPrintf
 
 {{$NEXT}}
 
+3.03 2020-09-26T07:31:49Z
+
+    - Introduce $VISUAL_WIDTH function pointer to calculate visual width.
+
 3.02 2020-02-07T00:58:27Z
 
     - Support truncation to one byte width.
