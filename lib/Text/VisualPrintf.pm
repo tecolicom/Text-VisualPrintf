@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Carp;
 
-our $VERSION = "3.03";
+our $VERSION = "3.04";
 
 use Exporter 'import';
 our @EXPORT_OK = qw(&vprintf &vsprintf);
@@ -63,7 +63,7 @@ sub _sub_uniqstr {
 	    my($a, $b) = @pair;
 	    return sub {
 		my $len = $VISUAL_WIDTH->(+shift);
-		return if $len < 2;
+		return if $len < 1;
 		( $a . ($b x ($len - 1)), qr/\Q${a}${b}\E*/, $len );
 	    };
 	}
@@ -93,7 +93,7 @@ Text::VisualPrintf - printf family functions to handle Non-ASCII characters
 
 =head1 VERSION
 
-Version 3.03
+Version 3.04
 
 =head1 DESCRIPTION
 
