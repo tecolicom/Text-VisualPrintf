@@ -15,7 +15,7 @@ Text::VisualPrintf - printf family functions to handle Non-ASCII characters
 
 # VERSION
 
-Version 3.05
+Version 3.06
 
 # DESCRIPTION
 
@@ -70,7 +70,7 @@ Kazumasa Utashiro
 
 # LICENSE
 
-Copyright (C) 2011-2020 Kazumasa Utashiro.
+Copyright 2011-2020 Kazumasa Utashiro.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.

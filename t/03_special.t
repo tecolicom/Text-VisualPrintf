@@ -129,4 +129,13 @@ for my $i (254..255) {
 	'truncation. (1 column)');
 }
 
+# TODO:
+{
+#     local $TODO = "Impossible...";
+# wow! i could do it.
+    is( Text::VisualPrintf::sprintf("%.0s%.2s", qw(一 二)),
+	"二",
+	'truncation. (two iterms)');
+}
+
 done_testing;

@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Carp;
 
-our $VERSION = "3.05";
+our $VERSION = "3.06";
 
 use Exporter 'import';
 our @EXPORT_OK = qw(&vprintf &vsprintf);
@@ -62,21 +62,22 @@ our $VISUAL_WIDTH = \&Text::VisualWidth::PP::width;
 
 sub _sub_uniqstr {
     local $_ = join '', @_;
-    my @pair;
+    my @magic;
     for my $i (1 .. 255) {
 	my $c = pack "C", $i;
 	next if $c =~ /\s/ || /\Q$c/;
-	push @pair, $c;
-	if (@pair >= 2) {
-	    my($a, $b) = @pair;
-	    return sub {
-		my $len = $VISUAL_WIDTH->(+shift);
-		return if $len < 1;
-		( $a . ($b x ($len - 1)), qr/\Q${a}${b}\E*/, $len );
-	    };
-	}
+	push @magic, $c;
+	last if @magic >= @_;
     }
-    return;
+    return if @magic < 2;
+    my($b, @a) = @magic;
+    my $i = 0;
+    return sub {
+	my $len = $VISUAL_WIDTH->(+shift);
+	return if $len < 1;
+	my $a = $a[ $i++ % @a ];
+	( $a . ($b x ($len - 1)), qr/\Q${a}${b}\E*/, $len );
+    };
 }
 
 1;
@@ -101,7 +102,7 @@ Text::VisualPrintf - printf family functions to handle Non-ASCII characters
 
 =head1 VERSION
 
-Version 3.05
+Version 3.06
 
 =head1 DESCRIPTION
 
@@ -167,7 +168,7 @@ Kazumasa Utashiro
 
 =head1 LICENSE
 
-Copyright (C) 2011-2020 Kazumasa Utashiro.
+Copyright 2011-2020 Kazumasa Utashiro.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.

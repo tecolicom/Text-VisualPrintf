@@ -2,6 +2,10 @@ Revision history for Perl extension Text-VisualPrintf
 
 {{$NEXT}}
 
+3.06 2020-09-28T11:58:45Z
+
+    - Update to cope with 0-length result.
+
 3.05 2020-09-28T05:37:20Z
 
     - Fix behavior to handle wide character in single column.
