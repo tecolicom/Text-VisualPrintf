@@ -2,6 +2,10 @@ Revision history for Perl extension Text-VisualPrintf
 
 {{$NEXT}}
 
+3.05 2020-09-28T05:37:20Z
+
+    - Fix behavior to handle wide character in single column.
+
 3.04 2020-09-27T15:46:45Z
 
     - Fix to handle 1-column parameter for Text::ANSI::Printf implementation.

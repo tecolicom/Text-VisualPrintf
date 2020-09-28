@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Carp;
 
-our $VERSION = "3.04";
+our $VERSION = "3.05";
 
 use Exporter 'import';
 our @EXPORT_OK = qw(&vprintf &vsprintf);
@@ -42,10 +42,18 @@ sub _replace {
     if ((my $width = length $matched) == $len) {
 	$orig;
     } else {
-	require Text::ANSI::Fold;
-	Text::ANSI::Fold
-	    ->new(text => $orig, width => $width, padding => 1)
-	    ->retrieve;
+	use Text::ANSI::Fold;
+	state $f = Text::ANSI::Fold->new(padding => 1);
+	my($folded, $rest, $w) = $f->fold($orig, width => $width);
+	if ($w <= $width) {
+	    $folded;
+	} elsif ($width == 1) {
+	    # wide char not fit to single column
+	    ' ';
+	} else {
+	    # should never reach here...
+	    ...
+	}
     }
 }
 
@@ -93,7 +101,7 @@ Text::VisualPrintf - printf family functions to handle Non-ASCII characters
 
 =head1 VERSION
 
-Version 3.04
+Version 3.05
 
 =head1 DESCRIPTION
 

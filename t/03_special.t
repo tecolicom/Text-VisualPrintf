@@ -111,7 +111,7 @@ for my $i (254..255) {
 #    local $TODO = "Truncation to 1 (Half-width KANA)";
     is( Text::VisualPrintf::sprintf("%.1s", "ｱｲｳ"),
 	"ｱ",
-	'truncation. (1 byte)');
+	'truncation. (1 column)');
 }
 
 {
@@ -123,9 +123,10 @@ for my $i (254..255) {
 # TODO:
 {
 #    local $TODO = "Truncation to 1";
+    # This behavior seems to be consistent.
     is( Text::VisualPrintf::sprintf("%.1s", "一二三"),
-	"一",
-	'truncation. (1 byte)');
+	" ",
+	'truncation. (1 column)');
 }
 
 done_testing;
