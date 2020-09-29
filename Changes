@@ -2,9 +2,13 @@ Revision history for Perl extension Text-VisualPrintf
 
 {{$NEXT}}
 
+3.07 2020-09-29T13:54:44Z
+
+    - More robust logic for 0-width result with many args.
+
 3.06 2020-09-28T11:58:45Z
 
-    - Update to cope with 0-length result.
+    - Update to cope with 0-width result.
 
 3.05 2020-09-28T05:37:20Z
 

@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Carp;
 
-our $VERSION = "3.06";
+our $VERSION = "3.07";
 
 use Exporter 'import';
 our @EXPORT_OK = qw(&vprintf &vsprintf);
@@ -13,21 +13,25 @@ our @EXPORT_OK = qw(&vprintf &vsprintf);
 sub vprintf  { &printf (@_) }
 sub vsprintf { &sprintf(@_) }
 
+our $IS_TARGET = sub { $_[0] =~ /[\e\P{ASCII}]/ };
+
 sub sprintf {
     my($format, @args) = @_;
     my $uniqstr = _sub_uniqstr($format, @args)
 	or return CORE::sprintf $format, @args;
     my @replace;
-    for (@args) {
-	defined and /[\e\P{ASCII}]/ or next;
-	my($replace, $regex, $len) = $uniqstr->($_) or next;
-	push @replace, [ $regex, $_, $len ];
-	$_ = $replace;
+    for my $arg (@args) {
+	next if not defined $arg;
+	next if not $IS_TARGET->($arg);
+	my($replace, $regex, $len) = $uniqstr->($arg) or next;
+	push @replace, [ $regex, $arg, $len ];
+	$arg = $replace;
     }
     local $_ = CORE::sprintf $format, @args;
     while (@replace) {
 	my($regex, $orig, $len) = @{shift @replace};
-	s/($regex)/_replace($1, $orig, $len)/e;
+	# capture group is defined in $regex
+	s/$regex/_replace($1, $orig, $len)/e;
     }
     $_;
 }
@@ -39,21 +43,19 @@ sub printf {
 
 sub _replace {
     my($matched, $orig, $len) = @_;
-    if ((my $width = length $matched) == $len) {
-	$orig;
+    my $width = length $matched;
+    if ($width == $len) {
+	return $orig;
+    }
+    use Text::ANSI::Fold;
+    state $f = Text::ANSI::Fold->new(padding => 1);
+    my($folded, $rest, $w) = $f->fold($orig, width => $width);
+    if ($w <= $width) {
+	$folded;
+    } elsif ($width == 1) {
+	' '; # wide char not fit to single column
     } else {
-	use Text::ANSI::Fold;
-	state $f = Text::ANSI::Fold->new(padding => 1);
-	my($folded, $rest, $w) = $f->fold($orig, width => $width);
-	if ($w <= $width) {
-	    $folded;
-	} elsif ($width == 1) {
-	    # wide char not fit to single column
-	    ' ';
-	} else {
-	    # should never reach here...
-	    ...
-	}
+	die "Panic"; # should never reach here...
     }
 }
 
@@ -62,21 +64,21 @@ our $VISUAL_WIDTH = \&Text::VisualWidth::PP::width;
 
 sub _sub_uniqstr {
     local $_ = join '', @_;
-    my @magic;
+    my @a;
     for my $i (1 .. 255) {
 	my $c = pack "C", $i;
 	next if $c =~ /\s/ || /\Q$c/;
-	push @magic, $c;
-	last if @magic >= @_;
+	push @a, $c;
+	last if @a >= @_;
     }
-    return if @magic < 2;
-    my($b, @a) = @magic;
-    my $i = 0;
+    return if @a < 2;
+    my $lead = do { local $" = ''; qr/[^\Q@a\E]*+/ };
+    my $b = pop @a;
     return sub {
 	my $len = $VISUAL_WIDTH->(+shift);
 	return if $len < 1;
-	my $a = $a[ $i++ % @a ];
-	( $a . ($b x ($len - 1)), qr/\Q${a}${b}\E*/, $len );
+	my $a = $a[ (state $n)++ % @a ];
+	( $a . ($b x ($len - 1)), qr/\G${lead}\K(\Q${a}${b}\E*)/, $len );
     };
 }
 
@@ -102,7 +104,7 @@ Text::VisualPrintf - printf family functions to handle Non-ASCII characters
 
 =head1 VERSION
 
-Version 3.06
+Version 3.07
 
 =head1 DESCRIPTION
 

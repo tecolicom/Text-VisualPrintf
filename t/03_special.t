@@ -65,6 +65,25 @@ for my $i (254..255) {
 	"Too many ASCII format ($i)");
 }
 
+for my $i (1..252) {
+    my $allseq = join '', (map { pack("C", $_) } 1 .. $i);
+    is( Text::VisualPrintf::sprintf($allseq =~ s/%/%%/gr . "(%.0s)(%5s)", "壱", "弐"),
+	"$allseq()(   弐)",
+	"Many ASCII format ($i) with 0-width");
+}
+
+ TODO:
+# At least 3 uniq characters are necessary to process 0-width result.
+# Wrong parameter is used if only 2-characters are available.
+# Give up the process if < 2.
+for my $i (253..255) {
+    local $TODO = "Too many ASCII ($i)";
+    my $allseq = join '', (map { pack("C", $_) } 1 .. $i);
+    is( Text::VisualPrintf::sprintf($allseq =~ s/%/%%/gr . "(%.0s)(%5s)", "壱", "弐"),
+	"$allseq()(   弐)",
+	"Too many ASCII format ($i) with 0-width");
+}
+
 # TODO:
 {
 #    local $TODO = "Outlimit param";
@@ -135,7 +154,10 @@ for my $i (254..255) {
 # wow! i could do it.
     is( Text::VisualPrintf::sprintf("%.0s%.2s", qw(一 二)),
 	"二",
-	'truncation. (two iterms)');
+	'0-width truncation. (two iterms)');
+    is( Text::VisualPrintf::sprintf("%.0s%.0s%.2s", qw(一 二 三)),
+	"三",
+	'0-width truncation. (three iterms)');
 }
 
 done_testing;
