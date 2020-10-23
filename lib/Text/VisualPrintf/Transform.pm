@@ -173,16 +173,14 @@ the result into original text.
     print @expanded;
 
 Be aware that B<encode> and B<decode> method alter the values of given
-arguments.  Because they returns altered arguments too, this can be
+arguments.  Because they return results as a list too, this can be
 done more simply.
 
     print $xform->decode(expand($xform->encode(<>)));
 
 Next program implements ANSI terminal sequence aware expand command.
 
-    use Text::VisualPrintf::Transform;
     use Text::ANSI::Fold::Util qw(ansi_width);
-    use Text::Tabs qw(expand);
 
     my $xform = Text::VisualPrintf::Transform
         ->new(length => \&ansi_width,
@@ -191,19 +189,15 @@ Next program implements ANSI terminal sequence aware expand command.
         print $xform->decode(expand($xform->encode($_)));
     }
 
-Giving many arguments to B<decode> is not good idea, because
-replacement cycle is done for each item.  So 
+Giving many arguments to B<decode> is not a good idea, because
+replacement cycle is performed against all items.  So mix up the
+result into single string if possible.
 
     print $xform->decode(join '', @expanded);
 
-is more effective than:
-
-    $xform->decode(@expanded);
-    print @expanded;
-
 =head1 METHODS
 
-=over 4
+=over 7
 
 =item B<new>
 
@@ -244,20 +238,33 @@ altered.
 
 =head1 LIMITATION
 
-All arguments given to B<encode> method have to appear in same order
-in decoded string.  Each argument can be shorter than original, or it
-can be even disappeared.
+All arguments given to B<encode> method have to appear in the same
+order in to-be-decoded string.  Each argument can be shorter than
+the original, or it can even disappear.
 
-If an argument is trimmed down to single byte in a result, and it have
-to be recovered to wide character, it replaced by single space.
+If an argument is trimmed down into single byte in a result, and it
+have to be recovered to wide character, it is replaced by single
+space.
 
 Replacement string is made of characters those can not be found in all
 arguments.  So if they contains all characters from C<"\001"> to
 C<"\377">, B<encode> method does nothing.  It requires at least two.
 
+Minimum two characters is good enough to produce correct result if all
+arguments will appear in the same order.  However, if even single
+argument is missing, it wor'n work correctly.  Less characters, more
+confusion.
+
 =head1 SEE ALSO
 
-L<Text::VisualPrintf>, L<https://github.com/kaz-utashiro/Text-VisualPrintf>
+=over 4
+
+=item L<Text::VisualPrintf>, L<https://github.com/kaz-utashiro/Text-VisualPrintf>
+
+This module is originally implemented as a part of
+L<Text::VisualPrintf> module.
+
+=back
 
 =head1 AUTHOR
 
