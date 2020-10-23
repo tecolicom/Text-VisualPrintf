@@ -6,7 +6,7 @@ use utf8;
 use Carp;
 use Data::Dumper;
 {
-    no warnings 'redefine';
+    no warnings 'redefine', 'once';
     *Data::Dumper::qquote = sub { qq["${\(shift)}"] };
     $Data::Dumper::Useperl = 1;
     $Data::Dumper::Sortkey = 1;
@@ -28,11 +28,21 @@ sub new {
 
 sub configure {
     my $obj = shift;
-    while (my($key, $value) = splice @_, 0, 2) {
-	if (not exists $default{$key}) {
-	    croak "$key: invalid parameter";
+    while (my($k, $v) = splice @_, 0, 2) {
+	if (not exists $default{$k}) {
+	    croak "$k: invalid parameter";
 	}
-	$obj->{$key} = $value;
+	if ($k eq 'test') {
+	    my $sub = do {
+		if    (not $v)             { sub { 1 } }
+		elsif (ref $v eq 'Regexp') { sub { $_[0] =~ $v } }
+		elsif (ref $v eq 'CODE')   { $v }
+		else                       { sub { 1 } }
+	    };
+	    $obj->{$k} = $sub;
+	} else {
+	    $obj->{$k} = $v;
+	}
     }
     $obj;
 }
@@ -42,13 +52,11 @@ sub encode {
     $obj->{replace} = [];
     my $guard = $obj->guard_maker(0+@_, $obj->{except} // '', @_)
 	or return @_;
+    my $match = $obj->{match} or die;
+    my $test = $obj->{test};
     for my $arg (grep { defined } @_) {
-	if (my $test = $obj->{test}) {
-	    next unless ( ( ref $test eq 'Regexp' and $arg =~ $test ) or
-			  ( ref $test eq 'CODE'   and $test->($arg) ) );
-	}
-	my $match = $obj->{match} or die;
-	$arg =~ s{$obj->{match}}{
+	not $test or $test->($arg) or next;
+	$arg =~ s{$match}{
 	    if (my($replace, $regex, $len) = $guard->(${^MATCH})) {
 		push @{$obj->{replace}}, [ $regex, ${^MATCH}, $len ];
 		$replace;
@@ -62,12 +70,11 @@ sub encode {
 
 sub decode {
     my $obj = shift;
-    my @replace = @{$obj->{replace}};
+    my @replace = @{$obj->{replace}} or return @_;
   ARGS:
     for (@_) {
 	for my $i (0 .. $#replace) {
-	    my $ent = $replace[$i];
-	    my($regex, $orig, $len) = @$ent;
+	    my($regex, $orig, $len) = @{$replace[$i]};
 	    # capture group is defined in $regex
 	    if (s/$regex/_replace($1, $orig, $len)/e) {
 		splice @replace, 0, $i + 1;
@@ -189,9 +196,9 @@ Next program implements ANSI terminal sequence aware expand command.
         print $xform->decode(expand($xform->encode($_)));
     }
 
-Giving many arguments to B<decode> is not a good idea, because
-replacement cycle is performed against all items.  So mix up the
-result into single string if possible.
+Calling B<decode> method with many arguments is not a good idea, since
+replacement cycle is performed against all entries.  So collect them
+into single chunk if possible.
 
     print $xform->decode(join '', @expanded);
 
@@ -239,20 +246,19 @@ altered.
 =head1 LIMITATION
 
 All arguments given to B<encode> method have to appear in the same
-order in to-be-decoded string.  Each argument can be shorter than
+order in the to-be-decoded string.  Each argument can be shorter than
 the original, or it can even disappear.
 
-If an argument is trimmed down into single byte in a result, and it
-have to be recovered to wide character, it is replaced by single
-space.
+If an argument is trimmed down to single byte in a result, and it have
+to be recovered to wide character, it is replaced by single space.
 
 Replacement string is made of characters those can not be found in all
 arguments.  So if they contains all characters from C<"\001"> to
-C<"\377">, B<encode> method does nothing.  It requires at least two.
+C<"\377">, B<encode> does nothing.  It requires at least two.
 
 Minimum two characters is good enough to produce correct result if all
 arguments will appear in the same order.  However, if even single
-argument is missing, it wor'n work correctly.  Less characters, more
+argument is missing, it won't work correctly.  Less characters, more
 confusion.
 
 =head1 SEE ALSO
