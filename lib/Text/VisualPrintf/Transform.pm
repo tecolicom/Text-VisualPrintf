@@ -13,10 +13,11 @@ use Data::Dumper;
 }
 
 my %default = (
-    test   => undef,
-    length => sub { length $_[0] },
-    match  => qr/.+/s,
-    except => '',
+    test    => undef,
+    length  => sub { length $_[0] },
+    match   => qr/.+/s,
+    except  => '',
+    visible => 0,
 );
 
 sub new {
@@ -113,21 +114,30 @@ sub guard_maker {
     my $max = shift;
     local $_ = join '', @_;
     my @a;
-    for my $i (1 .. 255) {
+    my @range = @{ $obj->{range} //= $obj->char_range };
+    for my $i (@range) {
 	my $c = pack "C", $i;
-	next if $c =~ /\s/ || /\Q$c/;
-	push @a, $c;
+	push @a, $c unless /\Q$c/;;
 	last if @a > $max;
     }
     return if @a < 2;
     my $lead = do { local $" = ''; qr/[^\Q@a\E]*+/ };
-    my $b = pop @a;
+    my $b = shift @a;
     return sub {
 	my $len = $obj->{length}->(+shift);
 	return if $len < 1;
 	my $a = $a[ (state $n)++ % @a ];
 	( $a . ($b x ($len - 1)), qr/\G${lead}\K\Q${a}${b}\E*/, $len );
     };
+}
+
+sub char_range {
+    my $obj = shift;
+    my $v = $obj->{visible} // 0;
+    if    ($v == 0) { [ 0x01..0x07, 0x10..0x1f, 0x21..0x7f, 0x81..0xff ] }
+    elsif ($v == 1) { [ 0x21..0x7f, 0x01..0x07, 0x10..0x1f, 0x81..0xff ] }
+    elsif ($v == 2) { [ 0x21..0x7f ] }
+    else            { die }
 }
 
 1;
