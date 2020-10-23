@@ -75,8 +75,7 @@ sub decode {
     for (@_) {
 	for my $i (0 .. $#replace) {
 	    my($regex, $orig, $len) = @{$replace[$i]};
-	    # capture group is defined in $regex
-	    if (s/$regex/_replace($1, $orig, $len)/e) {
+	    if (s/$regex/_replace(${^MATCH}, $orig, $len)/pe) {
 		splice @replace, 0, $i + 1;
 		redo ARGS;
 	    }
@@ -127,7 +126,7 @@ sub guard_maker {
 	my $len = $obj->{length}->(+shift);
 	return if $len < 1;
 	my $a = $a[ (state $n)++ % @a ];
-	( $a . ($b x ($len - 1)), qr/\G${lead}\K(\Q${a}${b}\E*)/, $len );
+	( $a . ($b x ($len - 1)), qr/\G${lead}\K\Q${a}${b}\E*/, $len );
     };
 }
 
