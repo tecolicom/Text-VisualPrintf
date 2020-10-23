@@ -13,17 +13,15 @@ use Data::Dumper;
 }
 
 my %default = (
-    check   => undef,
-    length  => sub { length $_[0] },
-    pattern => qr/.+/s,
-    without => '',
+    test   => undef,
+    length => sub { length $_[0] },
+    match  => qr/.+/s,
+    except => '',
 );
 
 sub new {
     my $class = shift;
-    my $obj = bless {
-	%default,
-    }, $class;
+    my $obj = bless { %default }, $class;
     $obj->configure(@_) if @_;
     $obj;
 }
@@ -31,9 +29,8 @@ sub new {
 sub configure {
     my $obj = shift;
     while (my($key, $value) = splice @_, 0, 2) {
-	if (not exists $obj->{$key}) {
+	if (not exists $default{$key}) {
 	    croak "$key: invalid parameter";
-	    die;
 	}
 	$obj->{$key} = $value;
     }
@@ -43,15 +40,16 @@ sub configure {
 sub encode {
     my $obj = shift;
     $obj->{replace} = [];
-    my $uniqstr = $obj->_sub_uniqstr(@_) or return @_;
+    my $guard = $obj->guard_maker(0+@_, $obj->{except} // '', @_)
+	or return @_;
     for my $arg (grep { defined } @_) {
-	if (my $check = $obj->{check}) {
-	    next unless ( ( ref $check eq 'Regexp' and $arg =~ $check ) or
-			  ( ref $check eq 'CODE'   and $check->($arg) ) );
+	if (my $test = $obj->{test}) {
+	    next unless ( ( ref $test eq 'Regexp' and $arg =~ $test ) or
+			  ( ref $test eq 'CODE'   and $test->($arg) ) );
 	}
-	my $pattern = $obj->{pattern} or die;
-	$arg =~ s{$obj->{pattern}}{
-	    if (my($replace, $regex, $len) = $uniqstr->(${^MATCH})) {
+	my $match = $obj->{match} or die;
+	$arg =~ s{$obj->{match}}{
+	    if (my($replace, $regex, $len) = $guard->(${^MATCH})) {
 		push @{$obj->{replace}}, [ $regex, ${^MATCH}, $len ];
 		$replace;
 	    } else {
@@ -65,7 +63,6 @@ sub encode {
 sub decode {
     my $obj = shift;
     my @replace = @{$obj->{replace}};
-
   ARGS:
     for (@_) {
 	for my $i (0 .. $#replace) {
@@ -105,15 +102,16 @@ sub _trim {
     }
 }
 
-sub _sub_uniqstr {
+sub guard_maker {
     my $obj = shift;
-    local $_ = join '', @_, $obj->{without} //= '';
+    my $max = shift;
+    local $_ = join '', @_;
     my @a;
     for my $i (1 .. 255) {
 	my $c = pack "C", $i;
 	next if $c =~ /\s/ || /\Q$c/;
 	push @a, $c;
-	last if @a > @_;
+	last if @a > $max;
     }
     return if @a < 2;
     my $lead = do { local $" = ''; qr/[^\Q@a\E]*+/ };
@@ -149,20 +147,21 @@ Text::VisualPrintf::Transform - transform and recover interface for text process
 This is a general interface to transform text data into desirable
 form, and recover the result after the process.
 
-For examlle, L<Text::Tabs> does not take care of Asian wide characters
+For example, L<Text::Tabs> does not take care of Asian wide characters
 to calculate string width.  So next program does not work as we wish.
 
     use Text::Tabs;
     print expand <>;
 
 In this case, make transform object with B<length> function which
-understand wide character width, and replacement pattern.
+understand wide character width, and the pattern of string to be
+replaced.
 
     use Text::VisualPrintf::Transform;
     use Text::VisualWidth::PP;
     my $xform = Text::VisualPrintf::Transform
-        ->new(length  => \&Text::VisualWidth::PP::width,
-              pattern => qr/\P{ASCII}+/);
+        ->new(length => \&Text::VisualWidth::PP::width,
+              match  => qr/\P{ASCII}+/);
 
 Then next program encode data, call B<expand>() function, and recover
 the result into original text.
@@ -174,26 +173,33 @@ the result into original text.
     print @expanded;
 
 Be aware that B<encode> and B<decode> method alter the values of given
-arguments.
+arguments.  Because they returns altered arguments too, this can be
+done more simply.
 
-Because they returns altered arguments too, this can be done more
-simply.
-
-    print $xcode->decode(expand($xform->encode(<>)));
+    print $xform->decode(expand($xform->encode(<>)));
 
 Next program implements ANSI terminal sequence aware expand command.
 
     use Text::VisualPrintf::Transform;
-    use Text::ANSI::Fold::Util;
+    use Text::ANSI::Fold::Util qw(ansi_width);
     use Text::Tabs qw(expand);
 
     my $xform = Text::VisualPrintf::Transform
-        ->new(length  => \&Text::ANSI::Fold::Util::width,
-              pattern => qr/[^\t\n]+/);
+        ->new(length => \&ansi_width,
+              match  => qr/[^\t\n]+/);
     while (<>) {
         print $xform->decode(expand($xform->encode($_)));
     }
 
+Giving many arguments to B<decode> is not good idea, because
+replacement cycle is done for each item.  So 
+
+    print $xform->decode(join '', @expanded);
+
+is more effective than:
+
+    $xform->decode(@expanded);
+    print @expanded;
 
 =head1 METHODS
 
@@ -209,17 +215,17 @@ Create transform object.  Takes following parameters.
 
 Function to calculate text width.  Default is C<length>.
 
-=item B<pattern> => I<regex>
+=item B<match> => I<regex>
 
 Specify text area to be replaced.  Default is C<qr/.+/s>.
 
-=item B<check> => I<regex> or I<function>
+=item B<test> => I<regex> or I<sub>
 
-Specify regex or subroutine to check if the argument is to be
-processed or not.  Default is B<undef>, so all arguments will be
-subject to replace.
+Specify regex or subroutine to test if the argument is to be processed
+or not.  Default is B<undef>, so all arguments will be subject to
+replace.
 
-=item B<without> => I<string>
+=item B<except> => I<string>
 
 Transformation is done by replacing text with different string which
 can not be found in all arguments.  This parameter gives additional
@@ -229,13 +235,25 @@ string which also to be taken care of.
 
 =item B<encode>
 
-Encode arguments.
-
 =item B<decode>
 
-Decode arguments.
+Encode/Decode arguments and return them.  Given arguments will be
+altered.
 
 =back
+
+=head1 LIMITATION
+
+All arguments given to B<encode> method have to appear in same order
+in decoded string.  Each argument can be shorter than original, or it
+can be even disappeared.
+
+If an argument is trimmed down to single byte in a result, and it have
+to be recovered to wide character, it replaced by single space.
+
+Replacement string is made of characters those can not be found in all
+arguments.  So if they contains all characters from C<"\001"> to
+C<"\377">, B<encode> method does nothing.  It requires at least two.
 
 =head1 SEE ALSO
 
@@ -253,3 +271,5 @@ This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 =cut
+
+#  LocalWords:  ansi xform regex undef

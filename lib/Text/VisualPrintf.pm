@@ -23,9 +23,9 @@ our $VISUAL_WIDTH = \&Text::VisualWidth::PP::width;
 sub sprintf {
     my($format, @args) = @_;
     my $xform = Text::VisualPrintf::Transform
-	->new(without => $format,
-	      check   => $IS_TARGET,
-	      length  => $VISUAL_WIDTH);
+	->new(except => $format,
+	      test   => $IS_TARGET,
+	      length => $VISUAL_WIDTH);
     $xform->encode(@args) if $xform;
     my $s = CORE::sprintf $format, @args;
     $xform->decode($s) if $xform;
