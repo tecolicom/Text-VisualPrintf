@@ -25,7 +25,9 @@ sub sprintf {
     my $xform = Text::VisualPrintf::Transform
 	->new(except => $format,
 	      test   => $IS_TARGET,
-	      length => $VISUAL_WIDTH);
+	      length => $VISUAL_WIDTH,
+	      max    => int @args,
+	);
     $xform->encode(@args) if $xform;
     my $s = CORE::sprintf $format, @args;
     $xform->decode($s) if $xform;

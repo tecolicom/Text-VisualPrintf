@@ -17,7 +17,9 @@ my %default = (
     length  => sub { length $_[0] },
     match   => qr/.+/s,
     except  => '',
+    max     => 0,
     visible => 0,
+    ordered => 1,
 );
 
 sub new {
@@ -42,6 +44,7 @@ sub configure {
 	    };
 	    $obj->{$k} = $sub;
 	} else {
+	    $k eq 'length' and ( ref $v eq 'CODE' or die );
 	    $obj->{$k} = $v;
 	}
     }
@@ -51,7 +54,7 @@ sub configure {
 sub encode {
     my $obj = shift;
     $obj->{replace} = [];
-    my $guard = $obj->guard_maker(0+@_, $obj->{except} // '', @_)
+    my $guard = $obj->guard_maker($obj->{except} // '', @_)
 	or return @_;
     my $match = $obj->{match} or die;
     my $test = $obj->{test};
@@ -77,7 +80,11 @@ sub decode {
 	for my $i (0 .. $#replace) {
 	    my($regex, $orig, $len) = @{$replace[$i]};
 	    if (s/$regex/_replace(${^MATCH}, $orig, $len)/pe) {
-		splice @replace, 0, $i + 1;
+		if ($obj->{ordered}) {
+		    splice @replace, 0, $i + 1;
+		} else {
+		    splice @replace, $i, 1;
+		}
 		redo ARGS;
 	    }
 	}
@@ -111,14 +118,17 @@ sub _trim {
 
 sub guard_maker {
     my $obj = shift;
-    my $max = shift;
+    my $max = $obj->{max};
     local $_ = join '', @_;
     my @a;
-    my @range = @{ $obj->{range} //= $obj->char_range };
+    my @range = do {
+	map { $_->[0] .. $_->[1] }
+	@{ $obj->{range} //= $obj->char_range };
+    };
     for my $i (@range) {
 	my $c = pack "C", $i;
-	push @a, $c unless /\Q$c/;;
-	last if @a > $max;
+	push @a, $c unless /\Q$c/;
+	last if $max && @a > $max;
     }
     return if @a < 2;
     my $lead = do { local $" = ''; qr/[^\Q@a\E]*+/ };
@@ -127,7 +137,8 @@ sub guard_maker {
 	my $len = $obj->{length}->(+shift);
 	return if $len < 1;
 	my $a = $a[ (state $n)++ % @a ];
-	( $a . ($b x ($len - 1)), qr/\G${lead}\K\Q${a}${b}\E*/, $len );
+	my $bl = $len - 1;
+	( $a . ($b x $bl), qr/\G${lead}\K\Q$a$b\E{0,$bl}(?!\Q$b\E)/, $len );
     };
 }
 
