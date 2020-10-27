@@ -12,6 +12,12 @@ use Data::Dumper;
     $Data::Dumper::Sortkey = 1;
 }
 
+my %char_range = (
+    STRAIGHT => [ [0x01=>0x07], [0x10=>0x1f], [0x21=>0x7e], [0x81=>0xfe] ],
+    MODERATE => [ [0x21=>0x7e], [0x01=>0x07], [0x10=>0x1f], [0x81=>0xfe] ],
+    VISIBLE  => [ [0x21=>0x7e] ],
+    );
+
 my %default = (
     test    => undef,
     length  => sub { length $_[0] },
@@ -145,9 +151,9 @@ sub guard_maker {
 sub char_range {
     my $obj = shift;
     my $v = $obj->{visible} // 0;
-    if    ($v == 0) { [ [0x01=>0x07], [0x10=>0x1f], [0x21=>0x7e], [0x81=>0xfe] ] }
-    elsif ($v == 1) { [ [0x21=>0x7e], [0x01=>0x07], [0x10=>0x1f], [0x81=>0xfe] ] }
-    elsif ($v == 2) { [ [0x21=>0x7e] ] }
+    if    ($v == 0) { $char_range{STRAIGHT} }
+    elsif ($v == 1) { $char_range{MODERATE} }
+    elsif ($v == 2) { $char_range{VISIBLE}  }
     else            { die }
 }
 
