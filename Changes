@@ -2,6 +2,11 @@ Revision history for Perl extension Text-VisualPrintf
 
 {{$NEXT}}
 
+3.10 2020-10-27T09:00:17Z
+
+    - Change character range used for replacement.
+    - Introduce "visible", "max" and "ordered" parameter.
+
 3.09 2020-10-23T06:15:14Z
 
     - Cut off the string replacement part into Transform.pm.
