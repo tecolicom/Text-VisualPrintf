@@ -42,13 +42,12 @@ sub configure {
 	    croak "$k: invalid parameter";
 	}
 	if ($k eq 'test') {
-	    my $sub = do {
+	    $obj->{$k} = do {
 		if    (not $v)             { sub { 1 } }
 		elsif (ref $v eq 'Regexp') { sub { $_[0] =~ $v } }
 		elsif (ref $v eq 'CODE')   { $v }
 		else                       { sub { 1 } }
 	    };
-	    $obj->{$k} = $sub;
 	} else {
 	    $k eq 'length' and ( ref $v eq 'CODE' or die );
 	    $obj->{$k} = $v;
@@ -170,7 +169,10 @@ Text::VisualPrintf::Transform - transform and recover interface for text process
 =head1 SYNOPSIS
 
     use Text::VisualPrintf::Transform;
-    my $xform = Text::VisualPrintf::Transform->new();
+    my $xform = Text::VisualPrintf::Transform->new(
+        length => \&sub,
+        match  => qr/regex/,
+        );
     $xform->encode(@args);
     $_ = foo(@args);
     $xform->decode($_);
@@ -186,8 +188,8 @@ to calculate string width.  So next program does not work as we wish.
     use Text::Tabs;
     print expand <>;
 
-In this case, make transform object with B<length> function which
-understand wide character width, and the pattern of string to be
+In this case, make transform object with B<length> function which can
+correctly handle wide character width, and the pattern of string to be
 replaced.
 
     use Text::VisualPrintf::Transform;
@@ -258,6 +260,38 @@ Transformation is done by replacing text with different string which
 can not be found in all arguments.  This parameter gives additional
 string which also to be taken care of.
 
+=item B<visible> => I<number>
+
+=over 4
+
+=item L<0>
+
+With default value 0, this module uses characters in the range:
+
+    [0x01=>0x07], [0x10=>0x1f], [0x21=>0x7e], [0x81=>0xfe]
+
+=item L<1>
+
+Use printable characters first, then use non-printable characters.
+
+    [0x21=>0x7e], [0x01=>0x07], [0x10=>0x1f], [0x81=>0xfe]
+
+=item L<2>
+
+Use only printable characters.
+
+    [0x21=>0x7e]
+
+=back
+
+=begin comment
+
+=item B<ordered>
+
+...
+
+=end comment
+
 =back
 
 =item B<encode>
@@ -272,20 +306,20 @@ altered.
 =head1 LIMITATION
 
 All arguments given to B<encode> method have to appear in the same
-order in the to-be-decoded string.  Each argument can be shorter than
-the original, or it can even disappear.
+order in the pre-decode string.  Each argument can be shorter than the
+original, or it can even disappear.
 
 If an argument is trimmed down to single byte in a result, and it have
 to be recovered to wide character, it is replaced by single space.
 
 Replacement string is made of characters those can not be found in all
-arguments.  So if they contains all characters from C<"\001"> to
-C<"\377">, B<encode> does nothing.  It requires at least two.
+arguments.  So if they contains all characters in the given range,
+B<encode> stop to work.  It requires at least two.
 
-Minimum two characters is good enough to produce correct result if all
-arguments will appear in the same order.  However, if even single
-argument is missing, it won't work correctly.  Less characters, more
-confusion.
+Minimum two characters are enough to produce correct result if all
+arguments will appear in the same order.  However, if even single item
+is missing, it won't work correctly.  Using three characters, one
+continuous missing is allowed.  Less characters, more confusion.
 
 =head1 SEE ALSO
 
