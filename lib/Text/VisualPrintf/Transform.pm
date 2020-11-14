@@ -194,9 +194,10 @@ replaced.
 
     use Text::VisualPrintf::Transform;
     use Text::VisualWidth::PP;
-    my $xform = Text::VisualPrintf::Transform
-        ->new(length => \&Text::VisualWidth::PP::width,
-              match  => qr/\P{ASCII}+/);
+    my $xform = Text::VisualPrintf::Transform->new(
+        length => \&Text::VisualWidth::PP::width,
+        match  => qr/\P{ASCII}+/,
+    );
 
 Then next program encode data, call B<expand>() function, and recover
 the result into original text.
@@ -217,9 +218,10 @@ Next program implements ANSI terminal sequence aware expand command.
 
     use Text::ANSI::Fold::Util qw(ansi_width);
 
-    my $xform = Text::VisualPrintf::Transform
-        ->new(length => \&ansi_width,
-              match  => qr/[^\t\n]+/);
+    my $xform = Text::VisualPrintf::Transform->new(
+        length => \&ansi_width,
+        match  => qr/[^\t\n]+/,
+    );
     while (<>) {
         print $xform->decode(expand($xform->encode($_)));
     }
