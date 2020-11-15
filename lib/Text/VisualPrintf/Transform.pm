@@ -59,11 +59,11 @@ sub configure {
 sub encode {
     my $obj = shift;
     $obj->{replace} = [];
-    my $guard = $obj->guard_maker($obj->{except} // '', @_)
+    my $guard = $obj->guard_maker(grep defined, $obj->{except}, @_)
 	or return @_;
     my $match = $obj->{match} or die;
     my $test = $obj->{test};
-    for my $arg (grep { defined } @_) {
+    for my $arg (grep defined, @_) {
 	not $test or $test->($arg) or next;
 	$arg =~ s{$match}{
 	    if (my($replace, $regex, $len) = $guard->(${^MATCH})) {
