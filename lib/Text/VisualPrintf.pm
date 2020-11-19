@@ -1,6 +1,6 @@
 package Text::VisualPrintf;
 
-our $VERSION = "3.11";
+our $VERSION = "4.01";
 
 use v5.14;
 use warnings;
@@ -60,7 +60,7 @@ Text::VisualPrintf - printf family functions to handle Non-ASCII characters
 
 =head1 VERSION
 
-Version 3.11
+Version 4.01
 
 =head1 DESCRIPTION
 
