@@ -42,7 +42,7 @@
       },
       "runtime" : {
          "requires" : {
-            "Text::ANSI::Fold" : "2.02",
+            "Text::Conceal" : "0.99",
             "Text::VisualWidth::PP" : "0.05",
             "perl" : "5.014"
          }
