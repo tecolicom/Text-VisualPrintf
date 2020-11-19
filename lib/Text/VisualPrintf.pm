@@ -2,8 +2,7 @@ package Text::VisualPrintf;
 
 our $VERSION = "3.11";
 
-use v5.10;
-use strict;
+use v5.14;
 use warnings;
 use Carp;
 
@@ -22,11 +21,11 @@ our $VISUAL_WIDTH = \&Text::VisualWidth::PP::width;
 
 sub sprintf {
     my($format, @args) = @_;
-    my $conceal = Text::Conceal
-	->new(except => $format,
-	      test   => $IS_TARGET,
-	      length => $VISUAL_WIDTH,
-	      max    => int @args,
+    my $conceal = Text::Conceal->new(
+	except => $format,
+	test   => $IS_TARGET,
+	length => $VISUAL_WIDTH,
+	max    => int @args,
 	);
     $conceal->encode(@args) if $conceal;
     my $s = CORE::sprintf $format, @args;
