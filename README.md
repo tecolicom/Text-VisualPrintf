@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/kaz-utashiro/Text-VisualPrintf.svg?branch=master)](https://travis-ci.com/kaz-utashiro/Text-VisualPrintf) [![MetaCPAN Release](https://badge.fury.io/pl/Text-VisualPrintf.svg)](https://metacpan.org/release/Text-VisualPrintf)
+[![MetaCPAN Release](https://badge.fury.io/pl/Text-VisualPrintf.svg)](https://metacpan.org/release/Text-VisualPrintf)
 # NAME
 
 Text::VisualPrintf - printf family functions to handle Non-ASCII characters
@@ -41,6 +41,17 @@ space.
 
 # VARIABLES
 
+- $REORDER
+
+    The original `printf` function has the ability to specify the
+    arguments to be targeted by the position specifier, but by default
+    this module assumes that the arguments will appear in the given order,
+    so you will not get the expected result. If you wish to use it, set
+    the package variable `$REORDER` to 1.
+
+    By doing so, the order in which arguments appear can be changed and
+    the same argument can be processed even if it appears more than once.
+
 - $VISUAL\_WIDTH
 
     Hold a function reference to calculate visual width of given string.
@@ -65,12 +76,12 @@ one.
 
 # SEE ALSO
 
-[Text::VisualPrintf](https://metacpan.org/pod/Text::VisualPrintf), [Text::VisualPrintf::IO](https://metacpan.org/pod/Text::VisualPrintf::IO),
-[https://github.com/kaz-utashiro/Text-VisualPrintf](https://github.com/kaz-utashiro/Text-VisualPrintf)
+[Text::VisualPrintf](https://metacpan.org/pod/Text%3A%3AVisualPrintf), [Text::VisualPrintf::IO](https://metacpan.org/pod/Text%3A%3AVisualPrintf%3A%3AIO),
+[https://github.com/tecolicom/Text-VisualPrintf](https://github.com/tecolicom/Text-VisualPrintf)
 
-[Text::Conceal](https://metacpan.org/pod/Text::Conceal), [https://github.com/kaz-utashiro/Text-Conceal](https://github.com/kaz-utashiro/Text-Conceal)
+[Text::Conceal](https://metacpan.org/pod/Text%3A%3AConceal), [https://github.com/tecolicom/Text-Conceal](https://github.com/tecolicom/Text-Conceal)
 
-[Text::ANSI::Printf](https://metacpan.org/pod/Text::ANSI::Printf), [https://github.com/kaz-utashiro/Text-ANSI-Printf](https://github.com/kaz-utashiro/Text-ANSI-Printf)
+[Text::ANSI::Printf](https://metacpan.org/pod/Text%3A%3AANSI%3A%3APrintf), [https://github.com/tecolicom/Text-ANSI-Printf](https://github.com/tecolicom/Text-ANSI-Printf)
 
 # AUTHOR
 
@@ -78,7 +89,7 @@ Kazumasa Utashiro
 
 # LICENSE
 
-Copyright 2011-2020 Kazumasa Utashiro.
+Copyright 2011-2023 Kazumasa Utashiro.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
