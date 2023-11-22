@@ -29,11 +29,9 @@ sub sprintf {
 	max       => int @args,
 	ordered   => ! $REORDER,
 	duplicate => !!$REORDER,
-	);
-    $conceal->encode(@args) if $conceal;
-    my $s = CORE::sprintf $format, @args;
-    $conceal->decode($s)    if $conceal;
-    $s;
+    ) || goto &CORE::sprintf;
+    ($conceal->decode(CORE::sprintf($format,
+				    $conceal->encode(@args))))[0];
 }
 
 sub printf {
