@@ -2,6 +2,10 @@ Revision history for Perl extension Text-VisualPrintf
 
 {{$NEXT}}
 
+4.02 2023-11-22T02:52:09Z
+
+    - Introduce $REORDER variable and support positional argument
+
 4.01 2020-11-19T02:56:21Z
 
     - Release VisualPrintf/Transform.pm as Text::Conceal module.

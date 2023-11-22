@@ -65,7 +65,7 @@
          "web" : "https://github.com/tecolicom/Text-VisualPrintf"
       }
    },
-   "version" : "4.01",
+   "version" : "4.02",
    "x_authority" : "cpan:UTASHIRO",
    "x_contributors" : [
       "Kazumasa Utashiro <kaz@utashiro.com>"
