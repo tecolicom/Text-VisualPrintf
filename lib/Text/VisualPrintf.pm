@@ -67,8 +67,12 @@ Version 4.01
 
 =head1 DESCRIPTION
 
-Text::VisualPrintf is a almost-printf-compatible library with a
-capability of handling multi-byte wide characters properly.
+B<Text::VisualPrintf> is a almost-printf-compatible library with a
+capability of handling:
+
+    - Multi-byte wide characters
+    - Combining characters
+    - Backspaces
 
 When the given string is truncated by the maximum precision, space
 character is padded if the wide character does not fit to the remained
