@@ -111,29 +111,13 @@ the package variable C<$REORDER> to 1.
 By doing so, the order in which arguments appear can be changed and
 the same argument can be processed even if it appears more than once.
 
-=item $VISUAL_WIDTH
-
-Hold a function reference to calculate visual width of given string.
-Default function is C<Text::VisualWidth::PP::width>.
-
-=item $IS_TARGET
-
-Hold a regexp object of funciton reference to test if the given string
-is subject of replacement.  Default is C<qr/[\e\b\P{ASCII}]/>, and
-test if the string include C<ESCAPE> or C<BACKSPACE> or non-ASCII
-characters.
-
 =back
 
 =head1 IMPLEMENTATION NOTES
 
 Strings in the LIST which contains wide-width character are replaced
-before formatting, and recovered after the process.
-
-Unique replacement string contains combinations of two ASCII
-characters not found in the format string and all parameters.  If two
-characters are not available, function behaves just like a standard
-one.
+before formatting, and recovered after the process.  Replacement is
+implemented in the L<Text::Conceal> module.
 
 =head1 SEE ALSO
 
